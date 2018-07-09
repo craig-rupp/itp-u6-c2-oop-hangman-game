@@ -59,8 +59,10 @@ class HangmanGame(object):
         ltr = ltr.lower()
         if ltr in self.previous_guesses:
             raise InvalidGuessedLetterException()
-        elif self.remaining_misses < 1:
+        elif self.remaining_misses < 1 or '*' not in self.word.masked:
             raise GameFinishedException()
+        elif self.remaining_misses < 1 and '*' in self.word.masked:
+            raise GameLostException()
         else:
             check_obj = self.word.perform_attempt(ltr)
             print('masked word after attempt {}'.format(self.word.masked))
@@ -69,9 +71,12 @@ class HangmanGame(object):
             if check_obj.is_miss() is True:
                 self.remaining_misses -= 1
                 self.previous_guesses.append(ltr)
+                if self.is_lost():
+                    raise GameLostException()
             if check_obj.is_hit():
                 if self.is_won():
                     raise GameWonException()
+            return check_obj
     
     @classmethod   
     def select_random_word(cls, list_of_words):
@@ -97,7 +102,30 @@ class HangmanGame(object):
             return True
         return False
         
-        
+
+
+# game = HangmanGame(['aba'])
+# attempt = game.guess('a')
+# print(attempt.is_hit())
+# def test_game_wins_several_moves_repeated_words():
+#     game = HangmanGame(['aba'])
+
+#     attempt = game.guess('a')
+#     assert attempt.is_hit() is True
+#     assert game.remaining_misses == 5
+#     assert game.previous_guesses == ['a']
+#     assert game.word.masked == 'a*a'
+
+#     with pytest.raises(GameWonException):
+#         game.guess('b')
+
+#     assert game.is_finished() is True
+#     assert game.is_won() is True
+#     assert game.is_lost() is False
+
+#     assert game.remaining_misses == 5
+#     assert game.previous_guesses == ['a', 'b']
+#     assert game.word.masked == 'aba'
         
 
         
