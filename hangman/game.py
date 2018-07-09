@@ -25,6 +25,8 @@ class GuessAttempt(object):
 class GuessWord(object):
     
     def __init__(self, passed_word):
+        if not passed_word:
+            raise InvalidWordException()
         self.answer = passed_word.lower()
         self.masked = '*' * len(self.answer)
         
