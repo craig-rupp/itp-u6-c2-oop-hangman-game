@@ -41,11 +41,9 @@ class GuessWord(object):
                     new_mask += self.masked[idx]
             self.masked = new_mask
             att = GuessAttempt(character.lower(), hit=True)
-            return att
         else:
             att = GuessAttempt(character.lower(), miss=True)
-            return att        
-
+        return att
 
 class HangmanGame(object):
     
@@ -59,18 +57,21 @@ class HangmanGame(object):
         
     def guess(self, ltr):
         ltr = ltr.lower()
-        # Make sure characters hasn't been guessed already
         if ltr in self.previous_guesses:
             raise InvalidGuessedLetterException()
+        elif self.remaining_misses < 1:
+            raise GameFinishedException()
         else:
             check_obj = self.word.perform_attempt(ltr)
-            if check_obj.is_hit() is True:
+            print('masked word after attempt {}'.format(self.word.masked))
+            if check_obj.is_hit() is True and ltr not in self.previous_guesses:
                 self.previous_guesses.append(ltr)
-            elif check_obj.is_miss() is True:
+            if check_obj.is_miss() is True:
                 self.remaining_misses -= 1
                 self.previous_guesses.append(ltr)
-            return check_obj
-        
+            if check_obj.is_hit():
+                if self.is_won():
+                    raise GameWonException()
     
     @classmethod   
     def select_random_word(cls, list_of_words):
@@ -78,17 +79,30 @@ class HangmanGame(object):
             raise InvalidListOfWordsException()
         return random.choice(list_of_words)
         
+    def is_finished(self):
+        print(self.word.masked, self.remaining_misses)
+        if '*' not in self.word.masked and self.remaining_misses >= 1:
+            return True
+        elif self.remaining_misses < 1 and '*' in self.word.masked:
+            return True
+        return False
+        
+    def is_won(self):
+        if '*' not in self.word.masked and self.remaining_misses >= 1:
+            return True
+        return False
+    
+    def is_lost(self):
+        if '*' in self.word.masked and self.remaining_misses < 1:
+            return True
+        return False
+        
+        
+        
+
+        
 
 
-
-# def test_game_with_one_correct_guess():
-#     game = HangmanGame(['Python'])
-#     attempt = game.guess('y')
-
-#     assert attempt.is_hit() is True
-#     assert game.remaining_misses == 5
-#     assert game.previous_guesses == ['y']
-#     assert game.word.masked == '*y****'
 
 
 
