@@ -1,2 +1,2 @@
-ppytest==3.2.0
+pytest==3.2.0
 tox==2.7.0
